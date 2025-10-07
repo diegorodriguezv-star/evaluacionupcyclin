@@ -3,572 +3,605 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Circuitos Eléctricos</title>
+    <title>Evaluación de Upcycling - Grado 4º</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            600: '#0d9488',
+                            700: '#0f766e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        .timer-blink {
+            animation: blink 1s infinite;
         }
-        
-        body {
-            background: linear-gradient(135deg, #1a2a6c, #2c3e50);
-            color: white;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        
-        .circuits-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-        
-        .circuit-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        
-        .circuit-header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .circuit-title {
-            font-size: 1.8rem;
-            margin-bottom: 8px;
-            color: #4ecdc4;
-        }
-        
-        .circuit-description {
-            font-size: 0.95rem;
-            opacity: 0.8;
-            line-height: 1.5;
-        }
-        
-        .circuit-diagram {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 15px;
-            padding: 25px;
-            min-height: 300px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        
-        .battery {
-            width: 60px;
-            height: 30px;
-            background: linear-gradient(90deg, #ff6b6b, #ee5a52);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 10px 0;
-            position: relative;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        
-        .battery::before {
-            content: '+';
-            position: absolute;
-            left: -15px;
-            font-weight: bold;
-            color: white;
-        }
-        
-        .battery::after {
-            content: '-';
-            position: absolute;
-            right: -15px;
-            font-weight: bold;
-            color: white;
-        }
-        
-        .wire {
-            height: 3px;
-            background: #ffd700;
-            width: 100%;
-            margin: 5px 0;
-            position: relative;
-        }
-        
-        .wire-vertical {
-            width: 3px;
-            height: 40px;
-            margin: 0 2px;
-        }
-        
-        .bulb-container {
-            display: flex;
-            align-items: center;
-            margin: 10px 0;
-        }
-        
-        .bulb {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #f0f0f0, #d0d0d0);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .bulb.on {
-            background: linear-gradient(135deg, #ffff00, #ffeb3b);
-            box-shadow: 0 0 20px #ffff00, 0 4px 8px rgba(0,0,0,0.3);
-        }
-        
-        .bulb.on::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background: #ffeb3b;
-            border-radius: 50%;
-            filter: blur(8px);
-        }
-        
-        .switch {
-            width: 60px;
-            height: 30px;
-            background: #4a5568;
-            border-radius: 15px;
-            position: relative;
-            cursor: pointer;
-            margin: 10px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-        
-        .switch.on {
-            background: #48bb78;
-        }
-        
-        .switch-knob {
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 50%;
-            position: absolute;
-            left: 3px;
-            transition: transform 0.3s ease;
-        }
-        
-        .switch.on .switch-knob {
-            transform: translateX(30px);
-        }
-        
-        .switch-label {
-            color: white;
-            font-size: 0.8rem;
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .series-circuit .bulbs {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .parallel-circuit .bulbs {
-            display: flex;
-            gap: 20px;
-            margin: 15px 0;
-        }
-        
-        .parallel-circuit .bulb-branch {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .mixed-circuit .top-branch {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 15px;
-        }
-        
-        .mixed-circuit .bottom-bulb {
-            margin-top: 15px;
-        }
-        
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .control-btn {
-            padding: 10px 20px;
-            background: #4ecdc4;
-            color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        
-        .control-btn:hover {
-            background: #3da9a0;
-            transform: translateY(-2px);
-        }
-        
-        .control-btn.reset {
-            background: #ff6b6b;
-        }
-        
-        .control-btn.reset:hover {
-            background: #ee5a52;
-        }
-        
-        .info-panel {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            margin-top: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .info-title {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: #4ecdc4;
-            text-align: center;
-        }
-        
-        .info-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            line-height: 1.6;
-        }
-        
-        .info-item {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 15px;
-            border-radius: 10px;
-        }
-        
-        .info-item h3 {
-            color: #4ecdc4;
-            margin-bottom: 8px;
-        }
-        
-        @media (max-width: 768px) {
-            .circuits-container {
-                grid-template-columns: 1fr;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .circuit-title {
-                font-size: 1.5rem;
-            }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <header>
-            <h1>Simulador de Circuitos Eléctricos</h1>
-            <p class="subtitle">Aprende cómo funcionan los circuitos en serie, paralelo y mixtos interactuando con interruptores y observando el comportamiento de las bombillas</p>
-        </header>
-        
-        <div class="circuits-container">
-            <!-- Circuito en Serie -->
-            <div class="circuit-card series-circuit">
-                <div class="circuit-header">
-                    <h2 class="circuit-title">Circuito en Serie</h2>
-                    <p class="circuit-description">Todas las bombillas están conectadas una tras otra en una sola ruta. Si una se apaga, todas se apagan.</p>
+<body class="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+    <div id="app" class="container mx-auto px-4 py-4 max-w-4xl">
+        <!-- Student Info Form -->
+        <div id="studentForm" class="bg-white rounded-xl shadow-lg p-8 hidden">
+            <div class="text-center mb-8">
+                <div class="flex items-center justify-center mb-4">
+                    <i class="fas fa-sync-alt text-emerald-600 text-3xl mr-3"></i>
+                    <h1 class="text-3xl font-bold text-gray-800">Evaluación de Upcycling - Grado 4º</h1>
                 </div>
-                <div class="circuit-diagram">
-                    <div class="battery">9V</div>
-                    <div class="wire"></div>
-                    <div class="switch" id="series-switch-main">
-                        <span class="switch-knob"></span>
-                        <span class="switch-label">Interruptor Principal</span>
-                    </div>
-                    <div class="wire"></div>
-                    <div class="bulbs">
-                        <div class="bulb-container">
-                            <div class="bulb" id="series-bulb-1"></div>
-                        </div>
-                        <div class="bulb-container">
-                            <div class="bulb" id="series-bulb-2"></div>
-                        </div>
-                        <div class="bulb-container">
-                            <div class="bulb" id="series-bulb-3"></div>
-                        </div>
-                    </div>
-                    <div class="wire"></div>
-                </div>
+                <p class="text-gray-600 text-lg">
+                    Análisis DOFA y Justificación Investigativa en Proyectos de Upcycling
+                </p>
             </div>
-            
-            <!-- Circuito en Paralelo -->
-            <div class="circuit-card parallel-circuit">
-                <div class="circuit-header">
-                    <h2 class="circuit-title">Circuito en Paralelo</h2>
-                    <p class="circuit-description">Cada bombilla tiene su propia ruta independiente. Si una se apaga, las demás siguen funcionando.</p>
+
+            <div class="space-y-6">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-user text-emerald-600"></i>
+                    <label class="font-medium text-gray-700">Nombre del Estudiante:</label>
                 </div>
-                <div class="circuit-diagram">
-                    <div class="battery">9V</div>
-                    <div class="wire"></div>
-                    <div class="switch" id="parallel-switch-main">
-                        <span class="switch-knob"></span>
-                        <span class="switch-label">Interruptor Principal</span>
-                    </div>
-                    <div class="wire"></div>
-                    <div class="bulbs">
-                        <div class="bulb-branch">
-                            <div class="switch" id="parallel-switch-1">
-                                <span class="switch-knob"></span>
-                                <span class="switch-label">Bombilla 1</span>
-                            </div>
-                            <div class="bulb" id="parallel-bulb-1"></div>
-                        </div>
-                        <div class="bulb-branch">
-                            <div class="switch" id="parallel-switch-2">
-                                <span class="switch-knob"></span>
-                                <span class="switch-label">Bombilla 2</span>
-                            </div>
-                            <div class="bulb" id="parallel-bulb-2"></div>
-                        </div>
-                        <div class="bulb-branch">
-                            <div class="switch" id="parallel-switch-3">
-                                <span class="switch-knob"></span>
-                                <span class="switch-label">Bombilla 3</span>
-                            </div>
-                            <div class="bulb" id="parallel-bulb-3"></div>
-                        </div>
-                    </div>
-                    <div class="wire"></div>
+                <input type="text" id="studentName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Escribe tu nombre completo">
+
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-graduation-cap text-emerald-600"></i>
+                    <label class="font-medium text-gray-700">Grado:</label>
                 </div>
-            </div>
-            
-            <!-- Circuito Mixto -->
-            <div class="circuit-card mixed-circuit">
-                <div class="circuit-header">
-                    <h2 class="circuit-title">Circuito Mixto</h2>
-                    <p class="circuit-description">Combina conexiones en serie y paralelo. Las bombillas superiores están en paralelo, y la inferior está en serie con el conjunto.</p>
+                <select id="grade" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                    <option value="4º">4º Grado</option>
+                    <option value="5º">5º Grado</option>
+                    <option value="6º">6º Grado</option>
+                </select>
+
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-calendar text-emerald-600"></i>
+                    <label class="font-medium text-gray-700">Fecha de Presentación:</label>
                 </div>
-                <div class="circuit-diagram">
-                    <div class="battery">9V</div>
-                    <div class="wire"></div>
-                    <div class="switch" id="mixed-switch-main">
-                        <span class="switch-knob"></span>
-                        <span class="switch-label">Interruptor Principal</span>
-                    </div>
-                    <div class="wire"></div>
-                    <div class="top-branch">
-                        <div class="bulb-branch">
-                            <div class="switch" id="mixed-switch-1">
-                                <span class="switch-knob"></span>
-                                <span class="switch-label">Bombilla 1</span>
-                            </div>
-                            <div class="bulb" id="mixed-bulb-1"></div>
-                        </div>
-                        <div class="bulb-branch">
-                            <div class="switch" id="mixed-switch-2">
-                                <span class="switch-knob"></span>
-                                <span class="switch-label">Bombilla 2</span>
-                            </div>
-                            <div class="bulb" id="mixed-bulb-2"></div>
-                        </div>
-                    </div>
-                    <div class="wire"></div>
-                    <div class="bottom-bulb">
-                        <div class="switch" id="mixed-switch-3">
-                            <span class="switch-knob"></span>
-                            <span class="switch-label">Bombilla 3</span>
-                        </div>
-                        <div class="bulb" id="mixed-bulb-3"></div>
-                    </div>
-                    <div class="wire"></div>
-                </div>
+                <input type="date" id="date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+
+                <button id="startBtn" class="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-colors duration-200 mt-6">
+                    Iniciar Evaluación
+                </button>
             </div>
         </div>
-        
-        <div class="controls">
-            <button class="control-btn reset" onclick="resetAllCircuits()">Restablecer Todo</button>
-            <button class="control-btn" onclick="turnOnAll()">Encender Todo</button>
+
+        <!-- Test Interface -->
+        <div id="testInterface" class="hidden">
+            <!-- Header with timer and student info -->
+            <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-center">
+                    <div class="text-center sm:text-left mb-4 sm:mb-0">
+                        <p class="font-semibold text-gray-700" id="headerName"></p>
+                        <p class="text-sm text-gray-600" id="headerGradeDate"></p>
+                    </div>
+                    <div class="flex items-center bg-red-100 text-red-800 px-4 py-2 rounded-lg" id="timerDisplay">
+                        <i class="fas fa-clock mr-2"></i>
+                        <span class="font-bold text-lg" id="timeRemaining">30:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mb-6">
+                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                    <span id="questionProgress">Pregunta 1 de 10</span>
+                    <span id="timeProgress">Tiempo restante: 30:00</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div id="progressBar" class="bg-emerald-600 h-3 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <div class="flex items-start mb-4">
+                    <i class="fas fa-sync-alt text-emerald-600 text-xl mr-3 mt-1"></i>
+                    <h2 class="text-xl font-semibold text-gray-800 leading-relaxed" id="questionText"></h2>
+                </div>
+                
+                <!-- Evidence Badge -->
+                <div class="bg-emerald-50 border-l-4 border-emerald-400 p-4 mb-6 rounded">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-user text-emerald-600 mr-2"></i>
+                        <span class="font-medium text-emerald-800">Evidencia de Aprendizaje:</span>
+                    </div>
+                    <p class="text-emerald-700 text-sm" id="evidenceText"></p>
+                </div>
+
+                <!-- Options -->
+                <div id="optionsContainer" class="space-y-3">
+                    <!-- Options will be generated here -->
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex justify-between">
+                <button id="prevBtn" class="px-6 py-2 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Anterior
+                </button>
+                
+                <button id="nextBtn" class="px-6 py-2 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors duration-200">
+                    Siguiente
+                </button>
+            </div>
         </div>
-        
-        <div class="info-panel">
-            <h2 class="info-title">Conceptos Clave</h2>
-            <div class="info-content">
-                <div class="info-item">
-                    <h3>Circuito en Serie</h3>
-                    <p>• Corriente igual en todos los componentes<br>• Voltaje se divide entre componentes<br>• Si un componente falla, todo el circuito se apaga<br>• Resistencia total es la suma de todas las resistencias</p>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="hidden">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-4" id="resultsTitle">Evaluación Completada</h1>
+                    <p id="timeUpMessage" class="text-red-600 text-lg font-semibold mb-4 hidden">
+                        El tiempo de 30 minutos ha finalizado
+                    </p>
                 </div>
-                <div class="info-item">
-                    <h3>Circuito en Paralelo</h3>
-                    <p>• Voltaje igual en todos los componentes<br>• Corriente se divide entre ramas<br>• Si un componente falla, los demás siguen funcionando<br>• Resistencia total es menor que la menor resistencia individual</p>
+
+                <div class="mb-8 p-6 bg-emerald-50 rounded-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <p class="text-sm text-gray-600">Estudiante:</p>
+                            <p class="font-semibold" id="resultName"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Grado:</p>
+                            <p class="font-semibold" id="resultGrade"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Fecha:</p>
+                            <p class="font-semibold" id="resultDate"></p>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-2xl font-bold text-gray-800" id="finalScore">Puntaje Final: 0/10</p>
+                        <p id="scoreMessage" class="mt-2 font-semibold"></p>
+                    </div>
                 </div>
-                <div class="info-item">
-                    <h3>Circuito Mixto</h3>
-                    <p>• Combina características de serie y paralelo<br>• Análisis más complejo<br>• Permite diseños más eficientes<br>• Comportamiento depende de la configuración específica</p>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button id="downloadBtn" class="flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
+                        <i class="fas fa-download mr-2"></i>
+                        Descargar PDF
+                    </button>
+                    <button id="newTestBtn" class="flex items-center justify-center px-6 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors duration-200">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        Nueva Evaluación
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Estado de los circuitos
-        const circuitState = {
-            series: {
-                mainSwitch: false,
-                bulbs: [false, false, false]
+        // Question bank
+        const questionBank = [
+            {
+                question: "En un proyecto de upcycling de botellas plásticas, ¿qué representa una FORTALEZA en el análisis DOFA?",
+                options: [
+                    "La facilidad para encontrar botellas plásticas usadas",
+                    "La competencia de otras empresas recicladoras",
+                    "La falta de conocimiento sobre técnicas de upcycling",
+                    "Las regulaciones ambientales restrictivas"
+                ],
+                correctAnswer: 0,
+                evidence: "Realiza un análisis DOFA para evaluar las fortalezas, oportunidades, debilidades y amenazas de la solución."
             },
-            parallel: {
-                mainSwitch: false,
-                switches: [false, false, false],
-                bulbs: [false, false, false]
+            {
+                question: "¿Cuál de las siguientes es una OPORTUNIDAD para un proyecto de upcycling de ropa vieja?",
+                options: [
+                    "La creciente conciencia ambiental de la comunidad",
+                    "La dificultad para coser prendas",
+                    "La falta de espacio para trabajar",
+                    "La competencia con tiendas de ropa nueva"
+                ],
+                correctAnswer: 0,
+                evidence: "Realiza un análisis DOFA para evaluar las fortalezas, oportunidades, debilidades y amenazas de la solución."
             },
-            mixed: {
-                mainSwitch: false,
-                switches: [false, false, false],
-                bulbs: [false, false, false]
+            {
+                question: "En un análisis DOFA para upcycling de neumáticos usados, ¿qué representa una AMENAZA?",
+                options: [
+                    "La alta creatividad del equipo",
+                    "Las nuevas leyes que prohíben el uso de neumáticos en proyectos escolares",
+                    "La habilidad para cortar neumáticos",
+                    "La disponibilidad de herramientas adecuadas"
+                ],
+                correctAnswer: 1,
+                evidence: "Realiza un análisis DOFA para evaluar las fortalezas, oportunidades, debilidades y amenazas de la solución."
+            },
+            {
+                question: "¿Por qué es importante investigar estudios académicos al proponer un proyecto de upcycling de residuos electrónicos?",
+                options: [
+                    "Para copiar exactamente lo que otros han hecho",
+                    "Para fundamentar científicamente los beneficios ambientales y técnicos de la propuesta",
+                    "Porque es más fácil que pensar en ideas propias",
+                    "Para hacer el proyecto más complicado"
+                ],
+                correctAnswer: 1,
+                evidence: "Justifica su propuesta a través de una base investigativa, que incluye tanto estudios académicos como información de actualidad."
+            },
+            {
+                question: "Al justificar un proyecto de upcycling de periódicos viejos, ¿qué tipo de información de actualidad sería más relevante?",
+                options: [
+                    "Estadísticas recientes sobre la cantidad de papel que se desperdicia en la escuela",
+                    "Noticias sobre películas populares",
+                    "Información sobre el clima de hace 10 años",
+                    "Datos sobre la producción de plástico en otros países"
+                ],
+                correctAnswer: 0,
+                evidence: "Justifica su propuesta a través de una base investigativa, que incluye tanto estudios académicos como información de actualidad."
+            },
+            {
+                question: "En un proyecto de upcycling de latas de aluminio, ¿qué constituye una DEBILIDAD?",
+                options: [
+                    "La abundancia de latas disponibles",
+                    "La dificultad para cortar y manipular el aluminio sin herramientas adecuadas",
+                    "El apoyo de la comunidad",
+                    "Las tendencias actuales de reciclaje"
+                ],
+                correctAnswer: 1,
+                evidence: "Realiza un análisis DOFA para evaluar las fortalezas, oportunidades, debilidades y amenazas de la solución."
+            },
+            {
+                question: "¿Cuál es el propósito principal de realizar un análisis DOFA en un proyecto de upcycling escolar?",
+                options: [
+                    "Hacer que el proyecto parezca más profesional",
+                    "Identificar estratégicamente los aspectos positivos y negativos internos y externos para mejorar la propuesta",
+                    "Cumplir con un requisito burocrático",
+                    "Impresionar a los compañeros de clase"
+                ],
+                correctAnswer: 1,
+                evidence: "Realiza un análisis DOFA para evaluar las fortalezas, oportunidades, debilidades y amenazas de la solución."
+            },
+            {
+                question: "Al investigar para justificar un proyecto de upcycling de cartón, ¿qué combinación de fuentes es más efectiva?",
+                options: [
+                    "Solo artículos de revistas de moda",
+                    "Estudios científicos sobre reciclaje combinados con datos actuales de consumo de cartón en la escuela",
+                    "Opiniones de celebridades sobre el medio ambiente",
+                    "Recetas de cocina relacionadas con reciclaje"
+                ],
+                correctAnswer: 1,
+                evidence: "Justifica su propuesta a través de una base investigativa, que incluye tanto estudios académicos como información de actualidad."
+            },
+            {
+                question: "En un análisis DOFA para upcycling de tapas plásticas, ¿qué representa una FORTALEZA?",
+                options: [
+                    "La creatividad del estudiante para transformar las tapas en objetos útiles",
+                    "La competencia de empresas grandes",
+                    "Las restricciones presupuestarias",
+                    "La falta de interés de la comunidad"
+                ],
+                correctAnswer: 0,
+                evidence: "Realiza un análisis DOFA para evaluar las fortalezas, oportunidades, debilidades y amenazas de la solución."
+            },
+            {
+                question: "¿Qué tipo de información de actualidad respaldaría mejor un proyecto de upcycling de residuos orgánicos?",
+                options: [
+                    "Datos recientes sobre la cantidad de residuos orgánicos generados en la cafetería escolar",
+                    "Noticias sobre deportes internacionales",
+                    "Información histórica sobre la Revolución Industrial",
+                    "Estadísticas sobre el uso de internet"
+                ],
+                correctAnswer: 0,
+                evidence: "Justifica su propuesta a través de una base investigativa, que incluye tanto estudios académicos como información de actualidad."
+            },
+            {
+                question: "En un proyecto de upcycling de envases de yogurt, ¿qué constituye una AMENAZA externa?",
+                options: [
+                    "La habilidad manual del estudiante",
+                    "Nuevas regulaciones sanitarias que prohíben el reuso de envases alimenticios",
+                    "La disponibilidad de pinturas para decorar",
+                    "El entusiasmo del grupo de trabajo"
+                ],
+                correctAnswer: 1,
+                evidence: "Realiza un análisis DOFA para evaluar las fortalezas, oportunidades, debilidades y amenazas de la solución."
+            },
+            {
+                question: "¿Por qué es importante incluir información de actualidad al justificar un proyecto de upcycling de bolsas plásticas?",
+                options: [
+                    "Para demostrar que el problema del plástico es actual y relevante en la comunidad",
+                    "Porque suena más moderno",
+                    "Para hacer el informe más largo",
+                    "Porque es un requisito arbitrario"
+                ],
+                correctAnswer: 0,
+                evidence: "Justifica su propuesta a través de una base investigativa, que incluye tanto estudios académicos como información de actualidad."
+            },
+            {
+                question: "En un análisis DOFA para upcycling de cajas de cartón, ¿qué representa una OPORTUNIDAD?",
+                options: [
+                    "La temporada de compras navideñas donde se generan más cajas",
+                    "La dificultad para encontrar pegamento",
+                    "La falta de espacio de almacenamiento",
+                    "La competencia con otros proyectos escolares"
+                ],
+                correctAnswer: 0,
+                evidence: "Realiza un análisis DOFA para evaluar las fortalezas, oportunidades, debilidades y amenazas de la solución."
+            },
+            {
+                question: "Al justificar un proyecto de upcycling de residuos textiles, ¿qué tipo de estudio académico sería más relevante?",
+                options: [
+                    "Investigaciones sobre el impacto ambiental de la industria textil y beneficios del reuso",
+                    "Estudios sobre la historia de la moda",
+                    "Artículos sobre turismo internacional",
+                    "Investigaciones sobre nutrición infantil"
+                ],
+                correctAnswer: 0,
+                evidence: "Justifica su propuesta a través de una base investigativa, que incluye tanto estudios académicos como información de actualidad."
+            },
+            {
+                question: "En un proyecto de upcycling de frascos de vidrio, ¿qué constituye una DEBILIDAD interna?",
+                options: [
+                    "La transparencia del vidrio que permite ver el contenido",
+                    "La dificultad para romper o cortar vidrio de forma segura sin equipo especializado",
+                    "El apoyo de los profesores",
+                    "La tendencia actual hacia productos reutilizables"
+                ],
+                correctAnswer: 1,
+                evidence: "Realiza un análisis DOFA para evaluar las fortalezas, oportunidades, debilidades y amenazas de la solución."
             }
-        };
+        ];
 
-        // Función para actualizar el estado visual de las bombillas
-        function updateBulbs() {
-            // Circuito en serie
-            const seriesOn = circuitState.series.mainSwitch;
-            circuitState.series.bulbs = [seriesOn, seriesOn, seriesOn];
-            document.getElementById('series-bulb-1').classList.toggle('on', seriesOn);
-            document.getElementById('series-bulb-2').classList.toggle('on', seriesOn);
-            document.getElementById('series-bulb-3').classList.toggle('on', seriesOn);
-            document.getElementById('series-switch-main').classList.toggle('on', seriesOn);
+        // State variables
+        let currentQuestion = 0;
+        let selectedAnswers = {};
+        let score = 0;
+        let timeLeft = 30 * 60; // 30 minutes in seconds
+        let timerInterval = null;
+        let testCompleted = false;
+        let questions = [];
 
-            // Circuito en paralelo
-            document.getElementById('parallel-switch-main').classList.toggle('on', circuitState.parallel.mainSwitch);
-            for (let i = 0; i < 3; i++) {
-                const bulbOn = circuitState.parallel.mainSwitch && circuitState.parallel.switches[i];
-                circuitState.parallel.bulbs[i] = bulbOn;
-                document.getElementById(`parallel-bulb-${i+1}`).classList.toggle('on', bulbOn);
-                document.getElementById(`parallel-switch-${i+1}`).classList.toggle('on', circuitState.parallel.switches[i]);
+        // DOM Elements
+        const studentForm = document.getElementById('studentForm');
+        const testInterface = document.getElementById('testInterface');
+        const resultsScreen = document.getElementById('resultsScreen');
+        const studentNameInput = document.getElementById('studentName');
+        const gradeInput = document.getElementById('grade');
+        const dateInput = document.getElementById('date');
+        const startBtn = document.getElementById('startBtn');
+        const headerName = document.getElementById('headerName');
+        const headerGradeDate = document.getElementById('headerGradeDate');
+        const timeRemaining = document.getElementById('timeRemaining');
+        const timeProgress = document.getElementById('timeProgress');
+        const questionProgress = document.getElementById('questionProgress');
+        const progressBar = document.getElementById('progressBar');
+        const questionText = document.getElementById('questionText');
+        const evidenceText = document.getElementById('evidenceText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const resultsTitle = document.getElementById('resultsTitle');
+        const timeUpMessage = document.getElementById('timeUpMessage');
+        const resultName = document.getElementById('resultName');
+        const resultGrade = document.getElementById('resultGrade');
+        const resultDate = document.getElementById('resultDate');
+        const finalScore = document.getElementById('finalScore');
+        const scoreMessage = document.getElementById('scoreMessage');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const newTestBtn = document.getElementById('newTestBtn');
+
+        // Utility functions
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
             }
+            return newArray.slice(0, 10);
+        }
 
-            // Circuito mixto
-            document.getElementById('mixed-switch-main').classList.toggle('on', circuitState.mixed.mainSwitch);
-            for (let i = 0; i < 3; i++) {
-                let bulbOn = false;
-                if (i < 2) {
-                    // Bombillas 1 y 2 (paralelo)
-                    bulbOn = circuitState.mixed.mainSwitch && circuitState.mixed.switches[i];
-                } else {
-                    // Bombilla 3 (serie con el conjunto paralelo)
-                    const parallelWorking = circuitState.mixed.switches[0] || circuitState.mixed.switches[1];
-                    bulbOn = circuitState.mixed.mainSwitch && circuitState.mixed.switches[2] && parallelWorking;
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timeRemaining.textContent = formatTime(timeLeft);
+                timeProgress.textContent = `Tiempo restante: ${formatTime(timeLeft)}`;
+                
+                if (timeLeft <= 60) {
+                    timeRemaining.classList.add('timer-blink');
+                    document.getElementById('timerDisplay').classList.add('bg-red-200');
                 }
-                circuitState.mixed.bulbs[i] = bulbOn;
-                document.getElementById(`mixed-bulb-${i+1}`).classList.toggle('on', bulbOn);
-                document.getElementById(`mixed-switch-${i+1}`).classList.toggle('on', circuitState.mixed.switches[i]);
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timeUp();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
             }
         }
 
-        // Event listeners para los interruptores
-        document.getElementById('series-switch-main').addEventListener('click', () => {
-            circuitState.series.mainSwitch = !circuitState.series.mainSwitch;
-            updateBulbs();
-        });
+        function timeUp() {
+            testCompleted = true;
+            showResults(true);
+        }
 
-        document.getElementById('parallel-switch-main').addEventListener('click', () => {
-            circuitState.parallel.mainSwitch = !circuitState.parallel.mainSwitch;
-            updateBulbs();
-        });
-
-        for (let i = 1; i <= 3; i++) {
-            document.getElementById(`parallel-switch-${i}`).addEventListener('click', () => {
-                circuitState.parallel.switches[i-1] = !circuitState.parallel.switches[i-1];
-                updateBulbs();
+        function showResults(isTimeUp = false) {
+            stopTimer();
+            
+            // Calculate score
+            score = 0;
+            questions.forEach((question, index) => {
+                if (selectedAnswers[index] === question.correctAnswer) {
+                    score++;
+                }
             });
             
-            document.getElementById(`mixed-switch-${i}`).addEventListener('click', () => {
-                circuitState.mixed.switches[i-1] = !circuitState.mixed.switches[i-1];
-                updateBulbs();
-            });
+            // Update results screen
+            const studentName = studentNameInput.value;
+            const grade = gradeInput.value;
+            const date = new Date(dateInput.value).toLocaleDateString('es-ES');
+            
+            resultName.textContent = studentName;
+            resultGrade.textContent = grade;
+            resultDate.textContent = date;
+            finalScore.textContent = `Puntaje Final: ${score}/${questions.length}`;
+            
+            if (isTimeUp) {
+                resultsTitle.textContent = '¡Tiempo Agotado!';
+                timeUpMessage.classList.remove('hidden');
+            } else {
+                resultsTitle.textContent = 'Evaluación Completada';
+                timeUpMessage.classList.add('hidden');
+            }
+            
+            // Set score message
+            if (score >= questions.length * 0.7) {
+                scoreMessage.textContent = '¡Excelente trabajo en upcycling!';
+                scoreMessage.className = 'mt-2 font-semibold text-green-600';
+            } else if (score >= questions.length * 0.5) {
+                scoreMessage.textContent = 'Buen esfuerzo, sigue practicando';
+                scoreMessage.className = 'mt-2 font-semibold text-yellow-600';
+            } else {
+                scoreMessage.textContent = 'Necesitas repasar más los conceptos de upcycling';
+                scoreMessage.className = 'mt-2 font-semibold text-red-600';
+            }
+            
+            // Show results screen
+            studentForm.classList.add('hidden');
+            testInterface.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
         }
 
-        document.getElementById('mixed-switch-main').addEventListener('click', () => {
-            circuitState.mixed.mainSwitch = !circuitState.mixed.mainSwitch;
-            updateBulbs();
+        function loadQuestion(index) {
+            const question = questions[index];
+            questionText.textContent = question.question;
+            evidenceText.textContent = question.evidence;
+            
+            // Clear options
+            optionsContainer.innerHTML = '';
+            
+            // Add options
+            question.options.forEach((option, optionIndex) => {
+                const optionBtn = document.createElement('button');
+                optionBtn.className = 'w-full text-left p-4 rounded-lg border-2 transition-all duration-200 border-gray-200 hover:border-emerald-300 hover:bg-gray-50';
+                if (selectedAnswers[index] === optionIndex) {
+                    optionBtn.className = 'w-full text-left p-4 rounded-lg border-2 transition-all duration-200 border-emerald-500 bg-emerald-50';
+                }
+                
+                optionBtn.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center border-gray-300">
+                            ${String.fromCharCode(65 + optionIndex)}
+                        </div>
+                        <span class="text-gray-700">${option}</span>
+                    </div>
+                `;
+                
+                optionBtn.onclick = () => {
+                    if (testCompleted) return;
+                    selectedAnswers[index] = optionIndex;
+                    loadQuestion(index);
+                };
+                
+                optionsContainer.appendChild(optionBtn);
+            });
+            
+            // Update progress
+            questionProgress.textContent = `Pregunta ${index + 1} de ${questions.length}`;
+            progressBar.style.width = `${(index / questions.length) * 100}%`;
+            
+            // Update navigation buttons
+            prevBtn.disabled = index === 0;
+            if (index === questions.length - 1) {
+                nextBtn.textContent = 'Finalizar Evaluación';
+            } else {
+                nextBtn.textContent = 'Siguiente';
+            }
+        }
+
+        function startTest() {
+            const studentName = studentNameInput.value.trim();
+            if (!studentName) return;
+            
+            // Initialize test
+            questions = shuffleArray(questionBank);
+            currentQuestion = 0;
+            selectedAnswers = {};
+            score = 0;
+            timeLeft = 30 * 60;
+            testCompleted = false;
+            
+            // Update header
+            headerName.textContent = studentName;
+            headerGradeDate.textContent = `${gradeInput.value} - ${new Date(dateInput.value).toLocaleDateString('es-ES')}`;
+            timeRemaining.textContent = formatTime(timeLeft);
+            timeProgress.textContent = `Tiempo restante: ${formatTime(timeLeft)}`;
+            
+            // Show test interface
+            studentForm.classList.add('hidden');
+            testInterface.classList.remove('hidden');
+            resultsScreen.classList.add('hidden');
+            
+            // Load first question
+            loadQuestion(0);
+            
+            // Start timer
+            startTimer();
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                loadQuestion(currentQuestion);
+            } else {
+                showResults(false);
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                loadQuestion(currentQuestion);
+            }
+        }
+
+        function newTest() {
+            // Reset everything
+            studentNameInput.value = '';
+            gradeInput.value = '4º';
+            dateInput.value = new Date().toISOString().split('T')[0];
+            
+            // Show student form
+            studentForm.classList.remove('hidden');
+            testInterface.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', startTest);
+        nextBtn.addEventListener('click', nextQuestion);
+        prevBtn.addEventListener('click', prevQuestion);
+        newTestBtn.addEventListener('click', newTest);
+        downloadBtn.addEventListener('click', () => {
+            alert('Función de descarga PDF: En un entorno real, esto generaría un PDF con las respuestas del estudiante. Esta funcionalidad requiere bibliotecas adicionales no disponibles en este entorno.');
         });
 
-        // Funciones de control
-        function resetAllCircuits() {
-            circuitState.series.mainSwitch = false;
-            circuitState.parallel.mainSwitch = false;
-            circuitState.parallel.switches = [false, false, false];
-            circuitState.mixed.mainSwitch = false;
-            circuitState.mixed.switches = [false, false, false];
-            updateBulbs();
-        }
-
-        function turnOnAll() {
-            circuitState.series.mainSwitch = true;
-            circuitState.parallel.mainSwitch = true;
-            circuitState.parallel.switches = [true, true, true];
-            circuitState.mixed.mainSwitch = true;
-            circuitState.mixed.switches = [true, true, true];
-            updateBulbs();
-        }
-
-        // Inicializar
-        updateBulbs();
+        // Initialize
+        window.onload = () => {
+            studentForm.classList.remove('hidden');
+            dateInput.value = new Date().toISOString().split('T')[0];
+        };
     </script>
 </body>
 </html>
+
